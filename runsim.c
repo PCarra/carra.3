@@ -34,6 +34,7 @@ int detachandremove(int shmid, void *shmaddr){
 	if (!error)
 		return 0;
 	errno = error;
+	//cleanuplicense();
 	return -1;
 }
 
@@ -176,10 +177,11 @@ int main (int argc, char *argv[]) {
 
 	//populate shared memory with command line argument for the number of available licenses
 	initlicense(num_proc);
-	license->number[0]=0;
 	printf("License count: %d\n", license->nlicenses);
 	//request a license from the license object
+	printf("right before getlicense call");
 	getlicense();
+	printf("right after getlicense call");
 	pr_count=0;
 	char buffer[MAX_CANON];
 	//read from stdin
@@ -215,7 +217,6 @@ int main (int argc, char *argv[]) {
 				return 1;
 			}
 			pr_count++;
-			license->number[pr_count]=pr_count;
 			//printf("I am a child %ld\n", (long)getpid());
                 	//pass the input string from stdin to docommand which will execl the command (child)
                         char progstr[20];

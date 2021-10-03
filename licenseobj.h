@@ -9,12 +9,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <sys/sem.h>
 
 
 struct License {
         int nlicenses;
-	bool choosing[20];
-	int number[20];
+	//bool choosing[20];
+	//int number[20];
+	int semid;
+	int logsemid;
 };
 
 

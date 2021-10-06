@@ -1,7 +1,7 @@
-/* File: testsim.c
+/* File: licenseobj.h
  * Author: Patrick Carra
  * Class: CS-4760
- * Project 2
+ * Project 3
  */
 
 #include <time.h>
@@ -14,10 +14,7 @@
 
 struct License {
         int nlicenses;
-	//bool choosing[20];
-	//int number[20];
 	int semid;
-	int logsemid;
 };
 
 
@@ -26,6 +23,4 @@ int returnlicense(void);
 int initlicense(int number);
 int addtolicenses(int n);
 int removelicenses(int n);
-//int logmsg(const char * msg, int i);
-int logmsg(const char * msg);
-
+int cleanuplicense();

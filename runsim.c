@@ -1,7 +1,7 @@
 /* File: runsim.c
  * Author: Patrick Carra
  * Class: CS-4760
- * Project 2
+ * Project 3
  */
 
 #include <stdlib.h>
@@ -13,6 +13,7 @@
 #include <string.h>
 #include "config.h"
 #include "licenseobj.h"
+#include "logfile.h"
 
 #define MAX_CANON 20
 #define IPC_RESULT_ERROR (-1)
@@ -27,14 +28,18 @@ extern struct License *license;
 //output success status
 int detachandremove(int shmid, void *shmaddr){
 	int error=0;
+	if (cleanuplog())
+		error = errno;
+	if (cleanuplicense(license->semid))
+		error = errno;
 	if (shmdt(shmaddr)==-1)
 		error = errno;
 	if ((shmctl(shmid, IPC_RMID, NULL)==-1) && !error)
 		error = errno;
-	if (!error)
+	if (!error){
 		return 0;
+	}
 	errno = error;
-	//cleanuplicense();
 	return -1;
 }
 
@@ -177,11 +182,10 @@ int main (int argc, char *argv[]) {
 
 	//populate shared memory with command line argument for the number of available licenses
 	initlicense(num_proc);
+	initsem();
 	printf("License count: %d\n", license->nlicenses);
 	//request a license from the license object
-	printf("right before getlicense call");
 	getlicense();
-	printf("right after getlicense call");
 	pr_count=0;
 	char buffer[MAX_CANON];
 	//read from stdin

@@ -1,7 +1,7 @@
 /* File: testsim.c
  * Author: Patrick Carra
  * Class: CS-4760
- * Project 2
+ * Project 3
  */
 
 #include <errno.h>
@@ -11,6 +11,7 @@
 #include <time.h>
 #include <string.h>
 #include "licenseobj.h"
+#include "logfile.h"
 
 extern struct License *license;
 

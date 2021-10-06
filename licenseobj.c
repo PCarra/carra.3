@@ -1,7 +1,7 @@
 /* File: licenseobj.c
  * Author: Patrick Carra
  * Class: CS-4760
- * Project 2
+ * Project 3 
  */
 
 #include <time.h>
@@ -18,55 +18,47 @@
 #include <stdlib.h>
 
 struct License *license;
-union semun {
-	int val;
-	struct semid_ds *buf;
-	ushort *array;
-};
-
 struct sembuf sb;
-/*
-if (semop(id, sem_lock, 1) < 0 ){
-//	//error handling code
-}
-*/
-/*
-if (semop(id, sem_unlock, 1) < 0){
-	//error handling code
-}
-*/
+extern int errno;
 
-
-int cleanuplicense(){
-	int error = 0;
-        if ((semctl(license->semid, 0, IPC_RMID)==-1) && !error)
-                error = errno;
-        if ((semctl(license->logsemid, 0, IPC_RMID)==-1) && !error)
-                error = errno;
+int cleanuplicense(int semid){
+	int errnum;
+        if (semctl(semid, 0, IPC_RMID)==-1){
+		errnum = errno;
+		perror("semctl remove semid");
+		errno = errnum;
+	}
 	return 0;
 
+}
+
+int lock_sem(int semid){
+	if(semop(semid, &sb, 1)==1){
+		perror("semop lock");
+		exit(1);
+	}
+	return 0;
+}
+
+int unlock_sem(int semid){
+	sb.sem_op=1;
+	if(semop(semid, &sb, 1)==-1){
+		perror("semop unlock");
+		exit(1);
+	}
+	return 0;
 }
 
 int getlicense(){
 	sb.sem_num=0;
 	sb.sem_op=-1;
-	sb.sem_flg=0;
+	sb.sem_flg=SEM_UNDO;
 	//Blocks until a license is availablea
-	printf("inside getlicense func\n");
-	if(semop(license->semid, &sb, 1)==-1){
-		perror("semop");
-		exit(1);
-	}
-	printf("getlicense locked the sem\n");
+	lock_sem(license->semid);
 	if(license->nlicenses>0){
 		(license->nlicenses)--;
 	}
-	sb.sem_op=1;
-	if(semop(license->semid, &sb, 1)==-1){
-		perror("semop");
-		exit(1);
-	}
-	printf("getlicense unlocked the sem\n");
+	unlock_sem(license->semid);
 	return 0;
 }
 
@@ -90,7 +82,6 @@ int initlicense(int number){
 		/* NOTREACHED */
 	}
 	license->semid = semget(keyid, 1, 0666 | IPC_CREAT);
-	license->logsemid = semget(keylog, 1, 0666 | IPC_CREAT);
 	sb.sem_num = 0;
 	sb.sem_op = 1;
 	sb.sem_flg = 0;
@@ -116,26 +107,3 @@ int removelicenses(int n){
 	license->nlicenses-=n;
 	return 0;
 }
-
-//int logmsg(const char * msg, int i){
-int logmsg(const char * msg){
-	//Write the specified message to the log file.  There is only one log file.
-	//This functino will treat the log file as a critical resource.  Append the message and close the file.
-	//lockup();
-	FILE *fp;
-       	fp = fopen("licenselog.log", "a");
-       	//returns -1 if filepointer is null
-       	if(fp==NULL){
-               	perror("Failed to open log");
-               	return -1;
-       	}
-       	//writes to file
-       	else {
-               	fprintf(fp, "%s\n", msg);
-               	fclose(fp);
-               	return 0;
-       	}
-	//unlock();
-	return 0;
-}
-

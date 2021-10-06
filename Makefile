@@ -8,8 +8,9 @@
 target1 = runsim
 target2 = testsim
 target3 = licenseobj
-objs1 = runsim.o licenseobj.o
-objs2 = testsim.o licenseobj.o
+target4 = logfile
+objs1 = runsim.o licenseobj.o logfile.o
+objs2 = testsim.o licenseobj.o logfile.o
 
 deps = $(patsubst %.o,%.h,$(objs))
 -include $(deps)
@@ -27,6 +28,9 @@ $(target2): $(objs2)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(target3): $(objs3)
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(target4): $(objs4)
 	$(CC) $(CFLAGS) -o $@ $^
 #%.o: %.c
 	#$(CC) $(CFLAGS) -c $< $(DEPFLAGS)
